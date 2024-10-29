@@ -6,6 +6,8 @@ import {
   InvoicesTable,
   LatestInvoiceRaw,
   Revenue,
+  RowFieldCount,
+  RowFieldSum,
 } from './definitions';
 import { formatCurrency } from './utils';
 
@@ -14,9 +16,7 @@ export async function fetchRevenue() {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
 
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
-
+    
     const data = await sql<Revenue>`SELECT * FROM revenue`;
 
     // console.log('Data fetch completed after 3 seconds.');
@@ -213,5 +213,54 @@ export async function fetchFilteredCustomers(query: string) {
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch customer table.');
+  }
+}
+
+
+
+
+
+
+export async function fetchTotalInvoices() {
+  try {
+    const data = await sql<RowFieldCount>`
+      SELECT count(*) FROM INVOICES`;
+    return data.rows[0].count;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch total invoices.');
+  }
+}
+
+export async function fetchTotalCustomers() {
+  try {
+    const data = await sql<RowFieldCount>`
+      SELECT count(*) FROM CUSTOMERS`;
+    return data.rows[0].count;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch total customers.');
+  }
+}
+export async function fetchTotalAmountInvoicesCollected() {
+  try {
+    const data = await sql<RowFieldSum>`
+      SELECT sum(amount) FROM INVOICES where status='paid'`;
+    return data.rows[0].sum;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch total invoices.');
+  }
+}
+
+
+export async function fetchTotalAmountInvoicesPending() {
+  try {
+    const data = await sql<RowFieldSum>`
+      SELECT sum(amount) FROM INVOICES where status='pending'`;
+    return data.rows[0].sum;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch total invoices.');
   }
 }
