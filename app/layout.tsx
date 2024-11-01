@@ -1,5 +1,5 @@
 import "@/app/ui/global.css";
-import { inter, dmsans } from "./ui/fonts";
+import {  dmsans } from "./ui/fonts";
 
 export default function RootLayout({
   children,

@@ -1,8 +1,8 @@
 import AcmeLogo from '@/app/ui/acme-logo';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import styles from "@/app/ui/home.module.css";
-import clsx from 'clsx';
+// import styles from "@/app/ui/home.module.css";
+// import clsx from 'clsx';
 import Image from 'next/image';
 
 export default function Page() {
@@ -55,11 +55,11 @@ export default function Page() {
 }
 
 
-const StyledButton = ({ status }: { status: "pending" | "paid" }) => {
-  return <button className={clsx("px-6 py-2 rounded-lg text-white", {
-    'bg-emerald-500 ': status == "paid",
-    'bg-red-600 ': status == "pending"
-  })}>
-    Payment status
-  </button>
-}
+// const StyledButton = ({ status }: { status: "pending" | "paid" }) => {
+//   return <button className={clsx("px-6 py-2 rounded-lg text-white", {
+//     'bg-emerald-500 ': status == "paid",
+//     'bg-red-600 ': status == "pending"
+//   })}>
+//     Payment status
+//   </button>
+// }

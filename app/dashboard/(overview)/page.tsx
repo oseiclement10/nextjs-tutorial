@@ -1,8 +1,6 @@
-import { Card } from '@/app/ui/dashboard/cards';
 import RevenueChart from '@/app/ui/dashboard/revenue-chart';
 import LatestInvoices from '@/app/ui/dashboard/latest-invoices';
 import { dmsans } from '@/app/ui/fonts';
-import { fetchLatestInvoices, fetchRevenue, fetchCardData } from '../../lib/data';
 import { Suspense } from 'react';
 import { CardSkeleton, InvoiceSkeleton, RevenueChartSkeleton } from '@/app/ui/skeletons';
 import CardWrapper from '@/app/ui/dashboard/cards';
