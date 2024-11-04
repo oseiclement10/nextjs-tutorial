@@ -15,6 +15,16 @@ const InvoiceDefinition = z.object({
 
 const FormSchema = InvoiceDefinition.omit({ id: true, date: true });
 
+export type State = {
+    errors?: {
+        customerId?: string[];
+        amount?: string[];
+        status?: string[];
+    };
+    message?: string | null;
+};
+
+
 export async function createInvoice(formData: FormData) {
 
     const {
@@ -33,7 +43,7 @@ export async function createInvoice(formData: FormData) {
         await sql`
         INSERT into invoices(customer_id, amount, status, date) values (${customerId}, ${amount * 100}, ${status}, ${date})
     `;
-    } catch  {
+    } catch {
         return {
             message: 'Database error . Failed to create Invoice',
         }
@@ -60,7 +70,7 @@ export const updateInvoice = async (id: string, formData: FormData) => {
         UPDATE invoices SET customer_id = ${customerId}, amount = ${amount * 100}, status=${status} 
         where id = ${id}
     `;
-    } catch  {
+    } catch {
         return {
             message: "Database error, failed updating invoice"
         }
@@ -74,11 +84,11 @@ export const updateInvoice = async (id: string, formData: FormData) => {
 
 export const deleteInvoice = async (id: string) => {
 
-   
+
     try {
         await sql`DELETE FROM INVOICES WHERE id = ${id}`;
 
-    } catch  {
+    } catch {
         return {
             message: ""
         }
