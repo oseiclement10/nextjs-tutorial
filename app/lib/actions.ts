@@ -3,17 +3,23 @@ import { z } from "zod";
 import { sql } from "@vercel/postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
+import { signIn } from "@/auth";
+import { AuthError } from "next-auth";
 
 const InvoiceDefinition = z.object({
     id: z.string(),
-    customerId: z.string(),
-    amount: z.coerce.number(),
-    status: z.enum(['pending', 'paid']),
+    customerId: z.string({
+        invalid_type_error: "Please select a customer"
+    }),
+    amount: z.coerce.number().gt(0, { message: "Please enter a number greater than 0" }),
+    status: z.enum(['pending', 'paid'], {
+        message: "Please select a valid invoice status"
+    }),
     date: z.string(),
 });
 
 const FormSchema = InvoiceDefinition.omit({ id: true, date: true });
+
 
 export type State = {
     errors?: {
@@ -25,17 +31,42 @@ export type State = {
 };
 
 
-export async function createInvoice(formData: FormData) {
+export const authenticate = async (prevState: undefined | string, formData: FormData) => {
+    try {
+        await signIn("credentials", formData);
+    } catch (error) {
+        if (error instanceof AuthError) {
+            switch (error.type) {
+                case "CredentialsSignin":
+                    return "Invalid credentials";
+                default:
+                    return "Something went wrong";
+            }
+        }
+        throw error;
+    }
+}
+
+export async function createInvoice(prevState: State, formData: FormData) {
+
+    const validatedFields = FormSchema.safeParse({
+        'customerId': formData.get('customerId'),
+        'amount': formData.get('amount'),
+        'status': formData.get('status')
+    });
+
+    if (!validatedFields.success) {
+        return {
+            message: 'Invalid Fields',
+            errors: validatedFields.error.flatten().fieldErrors,
+        }
+    }
 
     const {
         amount,
         customerId,
         status
-    } = FormSchema.parse({
-        'customerId': formData.get('customerId'),
-        'amount': formData.get('amount'),
-        'status': formData.get('status')
-    });
+    } = validatedFields.data;
 
     const date = new Date().toISOString().split("T")[0];
 
@@ -54,16 +85,27 @@ export async function createInvoice(formData: FormData) {
 
 }
 
-export const updateInvoice = async (id: string, formData: FormData) => {
-    const {
-        amount,
-        customerId,
-        status,
-    } = FormSchema.parse({
+export const updateInvoice = async (id: string, prevState: State, formData: FormData) => {
+
+    const validatedFields = FormSchema.safeParse({
         'customerId': formData.get('customerId'),
         'amount': formData.get('amount'),
         'status': formData.get('status')
     });
+
+    if (!validatedFields.success) {
+        return {
+            message: "Validation Failed",
+            errors: validatedFields.error.flatten().fieldErrors
+        }
+    }
+
+
+    const {
+        amount,
+        customerId,
+        status,
+    } = validatedFields.data;
 
     try {
         await sql`
@@ -72,13 +114,13 @@ export const updateInvoice = async (id: string, formData: FormData) => {
     `;
     } catch {
         return {
-            message: "Database error, failed updating invoice"
+            message: "Database error, failed updating invoice",
         }
     }
 
 
-    revalidatePath("/dashboard/invoices");
-    redirect("/dashboard/invoices");
+    // revalidatePath("/dashboard/invoices");
+    // redirect("/dashboard/invoices");
 }
 
 
